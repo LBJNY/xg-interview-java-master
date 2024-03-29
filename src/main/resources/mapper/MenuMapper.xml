@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xingu.xg.mapper.MenuMapper">
+    <update id="retrusion">
+        update menu
+        set sort=sort + 1
+        where parent_id = #{parentId}
+        <if test="containCurrentSort==true">
+            and sort <![CDATA[ >= ]]> #{sort}
+        </if>
+        <if test="containCurrentSort==false">
+            and sort <![CDATA[ > ]]> #{sort}
+        </if>
+    </update>
+
+    <update id="anteposition">
+        update menu
+        set sort=sort - 1
+        where parent_id = #{parentId}
+        <if test="containCurrentSort==true">
+            and sort <![CDATA[ >= ]]> #{sort}
+        </if>
+        <if test="containCurrentSort==false">
+            and sort <![CDATA[ > ]]> #{sort}
+        </if>
+    </update>
+
+    <select id="recursionSelectById" resultType="com.xingu.xg.entity.Menu">
+        with recursive t1 (id,name,parent_id,sort) as (
+            select * from menu p where id= #{copyId}
+            union all
+            select t.* from menu t inner join t1 on t.parent_id= t1.id
+        )
+        select * from t1;
+    </select>
+
+    <select id="getMaxSortMenuByParentId" resultType="com.xingu.xg.entity.Menu">
+        <![CDATA[
+        SELECT id,name,parent_id,sort  FROM menu where parent_id = #{parentId} order by sort desc  limit 1
+             ]]>
+    </select>
+</mapper>
